@@ -1,3 +1,9 @@
+#####################################################
+# Crawl data from CDC website and commandline prompt
+# Author: Yuting Chen
+# Uniquename: chyuting
+#####################################################
+
 import requests
 import json
 import datetime
@@ -83,7 +89,7 @@ def save_cache(cache_dict):
     fw.close() 
 
 def get_state_info(info):
-    '''Return dict {state_name: (accumulated, new, death)}
+    '''Return dict {state_name: (accumulated)}
     '''
     rows = info.find_all('div', class_='rt-tr-group')
     d = {}
@@ -97,21 +103,78 @@ def get_state_info(info):
                 d[state.text] = accumulated.text.replace(',', '') # '1,000' ->'1000'
     return d
 
+def cases_by_date(info):
+    '''Return dict{date(year-month-day): (accumulated, new)'''
+    table = info.find('tbody', class_='data-columns')
+    results = table.find_all('td')
+    numbers = {}
+    d = datetime.date(year=2020, month=1, day=22) # start date
+    prev = 0
+    for res in results:
+        acc = res.text
+        numbers[f'{d.year}-{d.month}-{d.day}']=(int(acc), int(acc)-int(prev))
+        d += datetime.timedelta(1) # move to the next day
+        prev = acc
+    # print('Accumulated cases and new case by date: \n')
+    # for key,value in numbers.items():
+    #     print(f"{key}:{value}")
+    return numbers
+
+def illness_by_date(info):
+    '''Return dict'''
+    table = info.find('tbody', class_='data-columns')
+    results = table.find_all('td')
+    numbers = {}
+    d = datetime.date(year=2020, month=1, day=22) # start date
+    for res in results:
+        numbers[f'{d.year}-{d.month}-{d.day}']=int(res.text)
+        d += datetime.timedelta(1) # move to the next day
+    # print('Illness people by date: \n')
+    # for key,value in numbers.items():
+    #     print(f"{key}:{value}")
+    return numbers
+
+def summary_today(info):
+    '''Summary of today: (Total cases, total death)'''
+    card = info.find('div', class_='card-body bg-white')
+    summary = card.find_all('li')
+    total_cases = summary[0].text.split(':')[1].replace(',', '')
+    total_death = summary[1].text.split(':')[1].replace(',', '')
+    return (total_cases, total_death)
+
 def update():
     '''Get the updated information'''
     cache = open_cache()
     if cache == {}: # If cache is empty
         print('Fetching')
         options = webdriver.ChromeOptions() # magic happens in silient
-        options.add_argument("headless") # don't display the window
+        options.add_argument("headless") # uncomment to watch how web driver works (deverloper view)
+        options.add_argument("--log-level=3") # supress log output
         options.add_argument("--window-size=1920,1080") # maximize the windowsize so that clickable
-        driver = webdriver.Chrome(executable_path=driver_path, chrome_options=options, service_log_path='NUL') # new driver
+        driver = webdriver.Chrome(executable_path=driver_path, options=options) # new driver
         driver.get(url=CDCurl)
+        
+        soup = BeautifulSoup(driver.page_source, 'html.parser') # get summary for today
+        cache['today'] = summary_today(soup)
+
         wait = WebDriverWait(driver, 10)
         wait.until(EC.frame_to_be_available_and_switch_to_it("cdcMaps1")) # switch to iframe
         wait.until(EC.element_to_be_clickable((By.CLASS_NAME, "collapsed.data-table-heading"))).click() # click by class name
         soup = BeautifulSoup(driver.page_source, 'html.parser')
-        cache = get_state_info(soup)
+        cache['state'] = get_state_info(soup)
+        
+        driver.switch_to.default_content() # switch to html tag
+        wait.until(EC.frame_to_be_available_and_switch_to_it("cdcCharts2")) # switch to the next iframe
+        soup = BeautifulSoup(driver.page_source, 'html.parser')
+        cache['date'] = cases_by_date(soup)
+
+        driver.switch_to.default_content()
+        wait.until(EC.frame_to_be_available_and_switch_to_it("cdcCharts3")) # switch to the next iframe
+        soup = BeautifulSoup(driver.page_source, 'html.parser')
+        cache['illness'] = illness_by_date(soup)
+        
+        driver.close()
+    
     else:
         print(f'Read from cache file {CACHE_FILE_PATH}')
     save_cache(cache)
@@ -126,19 +189,23 @@ def multi_capitalize(response):
     return ' '.join(captalized)
 
 
-
 if __name__ == "__main__":
-    clear_cache(clear_today=False) # update everday
+    clear_cache(clear_today=True) # update everday
     cache = update()
+    state_dict = cache['state']
+    date_list = cache['date']
+    total_cases, total_death = cache['today']
     print(f'''Welcome! Today's date is {today.strftime('%B')} {today.day}, {today.year}''')
+    print(f'''Unitil today, total cases number is {total_cases}, total death number is {total_death}.''')
+    
     while True:
         response = input("Please type in a state's name, i.e. Michigan: ")
         if response.lower() == 'exit':
             break
 
         response = multi_capitalize(response)
-        if response in cache:
-            print(f'The accumulated COVID19 cases of {response} is {cache[response]}.\n')
+        if response in state_dict:
+            print(f'The accumulated COVID19 cases of {response} is {state_dict[response]}.\n')
         
         else:
             print("Please type in a valid state's name")
