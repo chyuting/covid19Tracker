@@ -22,7 +22,7 @@ LOGGER.setLevel(logging.WARNING)
 driver_path = 'C:/Users/pc/Downloads/chromedriver_win32/chromedriver.exe' # Please change the driver path to where chrome driver is
 CDCurl = 'https://www.cdc.gov/coronavirus/2019-ncov/cases-in-us.html'
 today = datetime.date.today() # cache everyday
-CACHE_FILE_PATH = f'data_{today.month}_{today.day}.json'
+CACHE_FILE_PATH = f'CDC_{today.month}_{today.day}.json'
 
 def clear_cache(clear_today = False):
     '''Delete previous cache files
@@ -190,13 +190,13 @@ def multi_capitalize(response):
 
 
 if __name__ == "__main__":
-    clear_cache(clear_today=True) # update everday
+    clear_cache(clear_today=False) # update everday
     cache = update()
     state_dict = cache['state']
     date_list = cache['date']
     total_cases, total_death = cache['today']
     print(f'''Welcome! Today's date is {today.strftime('%B')} {today.day}, {today.year}''')
-    print(f'''Unitil today, total cases number is {total_cases}, total death number is {total_death}.''')
+    print(f'''Unitil today, total cases number is{total_cases}, total death number is{total_death}.''')
     
     while True:
         response = input("Please type in a state's name, i.e. Michigan: ")
