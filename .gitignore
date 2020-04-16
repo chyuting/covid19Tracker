@@ -1,6 +1,5 @@
 __pycache__
-*.json
-*.sqlite
+*.json 
 *.pdf
 .html
 secrets.py
