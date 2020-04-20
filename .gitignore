@@ -3,3 +3,4 @@ __pycache__
 *.pdf
 .html
 secrets.py
+document/

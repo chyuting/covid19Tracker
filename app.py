@@ -34,6 +34,62 @@ def get_history_data_by_state(state_nm):
         conn.close()
         return results
 
+def _todate(str):
+    '''change str to a date obj'''
+    y,m,d = str.split('-')
+    return datetime.date(year=int(y), month=int(m), day=int(d))
+
+def plot_stacked_bar(cache):
+    ''' Plot stacked bar figure'''
+    tend = cache['date']
+    x_vals = [_todate(key) for key in tend.keys()] # dates
+    y1_vals = [tend[key][0]-tend[key][1] for key in tend.keys()]
+    y2_vals = [tend[key][1] for key in tend.keys()]
+    stacked_fig = go.Figure(
+        data=[
+            go.Bar(name='New cases', x=x_vals, y=y2_vals),
+            go.Bar(name='Accumulated cases', x=x_vals, y=y1_vals)
+        ]
+    )
+    stacked_fig.update_layout(barmode='stack',  xaxis={'categoryorder': 'category ascending'})
+    stacked_fig.write_image('static/acc_new.png')
+
+def plot_pie_charts(cache):
+    ''' Plot 3 distribution pie charts'''
+    # distribution by states
+    state = cache['state']
+    labels, values =[], []
+    for key,value in state.items():
+        if key != None and value != 'None':
+            labels.append(key)
+            values.append(value)
+    pie_fig = go.Figure(
+        data=[go.Pie(labels=labels, values=values)]
+    )
+    pie_fig.update_traces(textposition='inside')
+    pie_fig.update_layout(uniformtext_minsize=10, uniformtext_mode='hide')
+    pie_fig.write_image('static/state_pie.png')
+
+    # distribution by age
+    age = cache['age']
+    labels = [key for key in age.keys() if key != 'Total']
+    values = [age[key] for key in labels]
+    pie_fig = go.Figure(
+        data=[go.Pie(labels=labels, values=values)]
+    )
+    pie_fig.write_image('static/age.png')
+
+    # distribution by race
+    race = cache['race']
+    labels = list(race.keys())
+    values = list(race.values())
+    pie_fig = go.Figure(
+        data=[go.Pie(labels=labels, values=values)]
+    )
+    pie_fig.update_layout(uniformtext_mode='hide')
+    pie_fig.write_image('static/race.png')
+
+
 @app.route('/')
 def index():
     total_cases, total_deaths = cache['today']
@@ -68,5 +124,7 @@ def state(state_nm):
         return html
 
 if __name__ == '__main__':
+    plot_stacked_bar(cache)
+    plot_pie_charts(cache)
     print('starting Flask app', app.name)
     app.run(debug=True)
