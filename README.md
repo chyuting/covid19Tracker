@@ -20,4 +20,8 @@ python JHU_API.py
 ```
 
 ## Visualization is coming soon : ) 
-Stay safe.
+Run Flask app. Click on state for details. Plotly-oraca library is required.
+
+```
+python app.py
+```
