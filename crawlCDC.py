@@ -43,7 +43,7 @@ def clear_cache(clear_today = False):
     start_date = datetime.date(year=2020, month=2, day=29)
     days_count = (today- start_date).days
     for single_date in [d for d in (start_date + datetime.timedelta(n) for n in range(days_count+flag))]:        
-        cache_file = f'data_{single_date.month}_{single_date.day}.json'
+        cache_file = f'CDC_{single_date.month}_{single_date.day}.json'
         if os.path.isfile(cache_file):
             print('Clear cache file: %s'%cache_file)
             os.remove(cache_file)
@@ -115,31 +115,12 @@ def cases_by_date(info):
         numbers[f'{d.year}-{d.month}-{d.day}']=(int(acc), int(acc)-int(prev))
         d += datetime.timedelta(1) # move to the next day
         prev = acc
-    # print('Accumulated cases and new case by date: \n')
-    # for key,value in numbers.items():
-    #     print(f"{key}:{value}")
-    return numbers
-
-def illness_by_date(info):
-    '''Return dict'''
-    table = info.find('tbody', class_='data-columns')
-    results = table.find_all('td')
-    numbers = {}
-    d = datetime.date(year=2020, month=1, day=22) # start date
-    for res in results:
-        numbers[f'{d.year}-{d.month}-{d.day}']=int(res.text)
-        d += datetime.timedelta(1) # move to the next day
-    # print('Illness people by date: \n')
-    # for key,value in numbers.items():
-    #     print(f"{key}:{value}")
     return numbers
 
 def summary_today(info):
     '''Summary of today: (Total cases, total death)'''
-    card = info.find('div', class_='card-body bg-white')
-    summary = card.find_all('li')
-    total_cases = summary[0].text.split(':')[1].replace(',', '')
-    total_death = summary[1].text.split(':')[1].replace(',', '')
+    total_cases = info.find('h2', id='covid-19-cases-total').text.replace(',', '').strip()
+    total_death = info.find('h2', id='covid-19-deaths-total').text.replace(',', '').strip()
     return (total_cases, total_death)
 
 def update():
@@ -168,10 +149,7 @@ def update():
         soup = BeautifulSoup(driver.page_source, 'html.parser')
         cache['date'] = cases_by_date(soup)
 
-        driver.switch_to.default_content()
-        wait.until(EC.frame_to_be_available_and_switch_to_it("cdcCharts3")) # switch to the next iframe
-        soup = BeautifulSoup(driver.page_source, 'html.parser')
-        cache['illness'] = illness_by_date(soup)
+        # TODO: fetch data by age group, race (updated since Apr 19)
         
         driver.close()
     
@@ -190,13 +168,13 @@ def multi_capitalize(response):
 
 
 if __name__ == "__main__":
-    clear_cache(clear_today=False) # update everday
+    clear_cache(clear_today=True) # update everday
     cache = update()
     state_dict = cache['state']
     date_list = cache['date']
     total_cases, total_death = cache['today']
     print(f'''Welcome! Today's date is {today.strftime('%B')} {today.day}, {today.year}''')
-    print(f'''Unitil today, total cases number is{total_cases}, total death number is{total_death}.''')
+    print(f'''Unitil today, total cases number is {total_cases}, total death number is {total_death}.''')
     
     while True:
         response = input("Please type in a state's name, i.e. Michigan: ")
