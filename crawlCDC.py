@@ -9,6 +9,7 @@ import json
 import datetime
 from bs4 import BeautifulSoup
 import os
+import re
 from selenium import webdriver
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
@@ -60,6 +61,7 @@ def open_cache():
     Returns
     -------
     The opened cache: dict
+
     '''
     try:
         cache_file = open(CACHE_FILE_PATH, 'r')
@@ -82,14 +84,25 @@ def save_cache(cache_dict):
     Returns
     -------
     None
+
     '''
     dumped_json_cache = json.dumps(cache_dict)
     fw = open(CACHE_FILE_PATH,"w")
     fw.write(dumped_json_cache)
     fw.close() 
 
-def get_state_info(info):
-    '''Return dict {state_name: (accumulated)}
+def cases_by_state(info):
+    ''' Get each state's accumulated cases
+
+    Parameters
+    ----------
+    info: beautifulsoup
+
+    Returns
+    -------
+    d: dict
+        {state name: accumulated cases number}
+
     '''
     rows = info.find_all('div', class_='rt-tr-group')
     d = {}
@@ -99,12 +112,22 @@ def get_state_info(info):
             state = content[0].find_all('span')[-1]
             accumulated = content[1].find('span')
             if accumulated.text != '0':
-                #print(state.text, accumulated.text)
                 d[state.text] = accumulated.text.replace(',', '') # '1,000' ->'1000'
     return d
 
 def cases_by_date(info):
-    '''Return dict{date(year-month-day): (accumulated, new)'''
+    ''' Get accumulated cases by date
+
+    Parameters
+    ----------
+    info: beautifulsoup
+
+    Returns
+    -------
+    numbers: dict
+        {'year-month-day': (accumulated, new)}
+
+    '''
     table = info.find('tbody', class_='data-columns')
     results = table.find_all('td')
     numbers = {}
@@ -118,38 +141,86 @@ def cases_by_date(info):
     return numbers
 
 def summary_today(info):
-    '''Summary of today: (Total cases, total death)'''
-    total_cases = info.find('h2', id='covid-19-cases-total').text.replace(',', '').strip()
-    total_death = info.find('h2', id='covid-19-deaths-total').text.replace(',', '').strip()
-    return (total_cases, total_death)
+    ''' Get today's summary
+
+    Parameters
+    ----------
+    info: beautifulsoup
+
+    Returns
+    -------
+    tuple 
+        (total cases, total deaths)
+
+    '''
+    total_cases = info.find('h2', id='covid-19-cases-total').text.replace(',', '').strip('\ufeff').strip()
+    total_deaths = info.find('h2', id='covid-19-deaths-total').text.replace(',', '').strip('\ufeff').strip()
+    return (total_cases, total_deaths)
+
+def cases_by_age_race(info):
+    ''' Get today's summary
+
+    Parameters
+    ----------
+    info: beautifulsoup
+
+    Returns
+    -------
+    tuple
+        ({age group: total number}, {race group: total number})
+
+    '''
+    table = info.find('table', class_='table table-sm table-bordered fs08 nein-scroll')
+    age_group = table.find_all('th', id=re.compile('^t1r02c0[2-8]')) # head
+    table_body = table.find('tbody') # body
+    numbers = table_body.find_all('tr') # rows
+    age_num = numbers[0].find_all('td')[1:] # first row, start from second column
+    age = {}
+    for i in range(len(age_group)):
+        age[age_group[i].text] = age_num[i].text.replace(',', '').strip()
+
+    race = {}
+    for i in numbers[4:10]:
+        race_name = i.find('td').text # first column is race name
+        race_num = i.find_all('td')[-1].text.split()[0].replace(',', '') # last column is total number
+        race[race_name] = race_num
+    return (age, race)
 
 def update():
-    '''Get the updated information'''
+    ''' Updated cache by data from CDC website
+    Parameters
+    ----------
+    None
+    
+    Returns
+    -------
+    cache: dict
+    
+    '''
     cache = open_cache()
     if cache == {}: # If cache is empty
         print('Fetching')
         options = webdriver.ChromeOptions() # magic happens in silient
-        options.add_argument("headless") # uncomment to watch how web driver works (deverloper view)
+        options.add_argument("headless") # comment to watch how web driver works (deverloper view)
         options.add_argument("--log-level=3") # supress log output
         options.add_argument("--window-size=1920,1080") # maximize the windowsize so that clickable
         driver = webdriver.Chrome(executable_path=driver_path, options=options) # new driver
         driver.get(url=CDCurl)
         
-        soup = BeautifulSoup(driver.page_source, 'html.parser') # get summary for today
-        cache['today'] = summary_today(soup)
+        soup = BeautifulSoup(driver.page_source, 'html.parser') 
+        cache['today'] = summary_today(soup) # get summary for today
+        cache['age'], cache['race'] = cases_by_age_race(soup) # get age and race distribution
 
         wait = WebDriverWait(driver, 10)
         wait.until(EC.frame_to_be_available_and_switch_to_it("cdcMaps1")) # switch to iframe
         wait.until(EC.element_to_be_clickable((By.CLASS_NAME, "collapsed.data-table-heading"))).click() # click by class name
         soup = BeautifulSoup(driver.page_source, 'html.parser')
-        cache['state'] = get_state_info(soup)
+        cache['state'] = cases_by_state(soup)
         
         driver.switch_to.default_content() # switch to html tag
         wait.until(EC.frame_to_be_available_and_switch_to_it("cdcCharts2")) # switch to the next iframe
         soup = BeautifulSoup(driver.page_source, 'html.parser')
         cache['date'] = cases_by_date(soup)
-
-        # TODO: fetch data by age group, race (updated since Apr 19)
         
         driver.close()
     
@@ -159,7 +230,16 @@ def update():
     return cache
 
 def multi_capitalize(response):
-    '''Processing user input'''
+    ''' Processing user input
+    Parameters
+    ----------
+    response: str
+    
+    Returns
+    -------
+    str
+    
+    '''
     seperated = response.split()
     captalized = []
     for i in seperated:
@@ -168,7 +248,7 @@ def multi_capitalize(response):
 
 
 if __name__ == "__main__":
-    clear_cache(clear_today=True) # update everday
+    clear_cache(clear_today=True) # False -> update everday, True -> delete all cache files
     cache = update()
     state_dict = cache['state']
     date_list = cache['date']
