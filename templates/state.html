@@ -12,14 +12,14 @@
   </style>
   <script>
     function myFunction() {
-    //   document.getElementById("myImg").src = "../static/{{nm}}.png";
       var x = document.getElementById("myImg");
       x.src = "../static/{{nm}}.png";
-        if (x.style.display === "none") {
-            x.style.display = "block";
-        } else {
-            x.style.display = "none";
-        }
+      x.style.display= 'block'
+        // if (x.style.display === "none") {
+        //     x.style.display = "block";
+        // } else {
+        //     x.style.display = "none";
+        // }
     }
   </script>
     
@@ -28,8 +28,9 @@
     <h1>
         History data for {{nm}}
     </h1>
-    <img id='myImg' alt='This is an image'>
-    <button onclick="myFunction()">Click to show/hide image.</button>
+    <button onclick="myFunction()">Click to show image.</button>
+    <br>
+    <img id='myImg'>
     <table>
         <tr>
             <th>Date</th>
