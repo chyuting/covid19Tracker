@@ -10,6 +10,7 @@ import crawlCDC
 import JHU_API
 
 app = Flask(__name__)
+app.config['SEND_FILE_MAX_AGE_DEFAULT'] = datetime.timedelta(seconds=60)
 today = crawlCDC.today
 cache = crawlCDC.open_cache()
 if cache == {}:
