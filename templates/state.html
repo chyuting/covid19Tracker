@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>State {{nm}}</title>
+  <style>
+        table, th, td {
+            border: 1px solid black;
+            border-collapse: collapse;
+            padding: 5px;
+        }
+  </style>
+  <script>
+    function myFunction() {
+    //   document.getElementById("myImg").src = "../static/{{nm}}.png";
+      var x = document.getElementById("myImg");
+      x.src = "../static/{{nm}}.png";
+        if (x.style.display === "none") {
+            x.style.display = "block";
+        } else {
+            x.style.display = "none";
+        }
+    }
+  </script>
+    
+</head>
+<body>
+    <h1>
+        History data for {{nm}}
+    </h1>
+    <img id='myImg' alt='This is an image'>
+    <button onclick="myFunction()">Click to show/hide image.</button>
+    <table>
+        <tr>
+            <th>Date</th>
+            <th>Total Cases</th>
+            <th>New Cases</th>
+            <th>Total Deaths</th>
+            <th>New Deaths</th>
+            <th>Total Recovered</th>
+            <th>New Recovered</th>
+            <th>Fatality Rate</th>
+        </tr>
+
+    {% for i in data %}
+        <tr>
+            <td>{{i[2]}}</td>
+            <td>{{i[3]}}</td>
+            <td>{{i[4]}}</td>
+            <td>{{i[5]}}</td>
+            <td>{{i[6]}}</td>
+            <td>{{i[7]}}</td>
+            <td>{{i[8]}}</td>
+            <td>{{i[9]}}</td>
+        </tr>    
+    {% endfor%}
+    </table>
+</body>
+</html>

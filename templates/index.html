@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Index</title>
+  <style>
+        table, th, td {
+            border: 1px solid black;
+            border-collapse: collapse;
+            padding: 5px;
+        }
+  </style>
+</head>
+<body>
+    <h1>
+        Today is {{month}} {{day}}, {{year}}.
+    </h1>
+    <h2>
+        Total Cases: {{cases}}, total deaths: {{deaths}}
+    </h2>
+    <h3>
+        Click state to view the details:
+    </h3>
+
+    <table>
+        <tr>
+            <th>State</th>
+            <th>Cases</th>
+        </tr>
+
+    {% for state in states %}
+    {% if state %}
+        <tr>
+            <td><a href="/state/{{state}}">{{state}}</a></td>
+            <td>{{states[state]}}</td>
+        </tr>
+    {% endif%}       
+    {% endfor%}
+    </table>
+</body>
+</html>
