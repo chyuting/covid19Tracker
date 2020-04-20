@@ -25,3 +25,13 @@ Run Flask app. Click on state for details. Plotly-oraca library is required.
 ```
 python app.py
 ```
+
+![alt text](https://github.com/chyuting/covid19Tracker/blob/master/static/acc_new.png "Nationwide")
+![alt text](https://github.com/chyuting/covid19Tracker/blob/master/static/state_pie.png "States distribution")
+![alt text](https://github.com/chyuting/covid19Tracker/blob/master/static/age.png "Age distribution")
+![alt text](https://github.com/chyuting/covid19Tracker/blob/master/static/race.png "Race distribution")
+![alt text](https://github.com/chyuting/covid19Tracker/blob/master/static/demo_all.png "Demo 1")
+![alt text](https://github.com/chyuting/covid19Tracker/blob/master/static/demo_michigan.png "Demo 1")
+
+
+
