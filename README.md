@@ -19,7 +19,7 @@ python crawlCDC.py
 python JHU_API.py
 ```
 
-## Visualization is coming soon : ) 
+## Visualization
 Run Flask app. Click on state for details. Plotly-oraca library is required.
 
 ```
