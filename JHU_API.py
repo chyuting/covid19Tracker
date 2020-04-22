@@ -10,6 +10,7 @@ import json
 import requests
 import datetime
 import os
+import crawlCDC
 
 key = secrets.jhuapi_key
 today = datetime.date.today()
@@ -17,6 +18,7 @@ DB_NAME = 'UScovid19.sqlite'
 
 def get_regions(iso='USA'):
     '''get valid regions(state, county) by iso
+    *cache file update everyday
     
     Parameters
     ----------
@@ -27,21 +29,28 @@ def get_regions(iso='USA'):
     -------
     dict
     '''
-    print(f'Fetching states/provinces for country {iso}!')
-    url = "https://covid-19-statistics.p.rapidapi.com/provinces"
-    querystring = {"iso":iso}
+    cache = crawlCDC.open_cache()
+    if 'api_regions' not in cache:
+        print(f'Fetching states/provinces for country {iso}!')
+        url = "https://covid-19-statistics.p.rapidapi.com/provinces"
+        querystring = {"iso":iso}
 
-    headers = {
-        'x-rapidapi-host': "covid-19-statistics.p.rapidapi.com",
-        'x-rapidapi-key': key
-        }
+        headers = {
+            'x-rapidapi-host': "covid-19-statistics.p.rapidapi.com",
+            'x-rapidapi-key': key
+            }
 
-    response = requests.request("GET", url, headers=headers, params=querystring)
-    return response.json()
+        response = requests.request("GET", url, headers=headers, params=querystring)
+        cache['api_regions'] = response.json()
+        crawlCDC.save_cache(cache)
+    else:
+        print('Reading from cache.')
+    return cache['api_regions']
 
 def get_reports(region, date):
     '''Get reports by region name and date
-    
+    *cache file update everyday
+
     Parameters
     ----------
     region: str
@@ -53,16 +62,22 @@ def get_reports(region, date):
     -------
     dict
     '''
+    cache = crawlCDC.open_cache()
     date_str = f'{date.year}-{date.month}-{date.day}'
-    print(f'Fetching data for {region} in date {date_str}!')
-    url = "https://covid-19-statistics.p.rapidapi.com/reports"
-    querystring = {"region_province": region,"iso":"USA","region_name":"US","date":date,"q":f"US {region}"}
-    headers = {
-        'x-rapidapi-host': "covid-19-statistics.p.rapidapi.com",
-        'x-rapidapi-key': key
-        }
-    response = requests.request("GET", url, headers=headers, params=querystring)
-    return response.json()
+    if f'api_{region}_{date_str}' not in cache:
+        print(f'Fetching data for {region} in date {date_str}!')
+        url = "https://covid-19-statistics.p.rapidapi.com/reports"
+        querystring = {"region_province": region,"iso":"USA","region_name":"US","date":date,"q":f"US {region}"}
+        headers = {
+            'x-rapidapi-host': "covid-19-statistics.p.rapidapi.com",
+            'x-rapidapi-key': key
+            }
+        response = requests.request("GET", url, headers=headers, params=querystring)
+        cache[f'api_{region}_{date_str}'] = response.json()
+        crawlCDC.save_cache(cache)
+    else:
+        print('Reading from cache.')
+    return cache[f'api_{region}_{date_str}']
 
 def create_DB(region_info):
     '''Create a database with a table 'Regions' '''
