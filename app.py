@@ -110,6 +110,21 @@ def plot(state_nm, data):
     fig.update_layout(xaxis={'categoryorder': 'category ascending'})
     fig.write_image(f'static/{state_nm}1.png')
 
+def get_bars_by_rating(sortby, chosen_date, orderby, limit):
+    conn = sqlite3.connect(DB_NAME)
+    cur = conn.cursor()
+    q = f'''
+        SELECT RegionName, {sortby} FROM Counts
+        JOIN Regions
+        ON Regions.Id = Counts.RegionId
+        WHERE Date = '{chosen_date}'
+        ORDER BY {sortby} {orderby}
+        LIMIT {limit}
+        '''
+    results = cur.execute(q).fetchall()
+    conn.close()
+    return results
+
 
 @app.route('/')
 def index():
@@ -120,6 +135,15 @@ def index():
     state_dict = cache['state']
     return render_template('index.html', month=m, year=y, day=d, 
     cases=total_cases, deaths=total_deaths, states = state_dict)
+
+@app.route('/results', methods=['POST'])
+def results():
+    sortby = request.form['sort']
+    chosen_date = request.form['chosen_date']
+    orderby = request.form['dir']
+    limit = request.form['howmany']
+    results = get_bars_by_rating(sortby=sortby, chosen_date=chosen_date, orderby=orderby, limit=limit)
+    return render_template('results.html', results = results)
 
 @app.route('/state/<state_nm>')
 def state(state_nm):

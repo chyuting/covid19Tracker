@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Filtered results</title>
+</head>
+<body>
+    <h1>This is the filtered results</h1>
+    {% if results is defined %}
+    <ol>
+    {% for row in results %}
+        <li>{{row[0]}}, {{row[1]}}</li>
+    {% endfor %}
+    </ol>
+    {% else %}
+    <p>Sorry. No data found. Please check your input and try it again.</p>
+    {% endif %}
+</body>
+</html>

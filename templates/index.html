@@ -30,6 +30,42 @@
     <img src='../static/age.png' alt='distribution by age'>
     <img src='../static/race.png' alt='distribution by race'>
 
+    <h3> Please choose from the four options: </h3>
+    <form action='results' method='POST'>
+        <p>
+            Sort by: <br/>
+            <input type='radio' name='sort'
+                value='Confirmed' checked='checked'/> Total comfirmed <br/>
+            <input type='radio' name='sort'
+                value='NewConfirmed' /> New comfirmed<br/>
+            <input type='radio' name='sort'
+                value='Deaths' /> Total deaths <br/>
+            <input type='radio' name='sort'
+                value='NewDeaths' /> New deaths <br/>
+            <input type='radio' name='sort'
+                value='FatalityRate' /> Fatality rate <br/>
+        </p>
+
+        <p>
+            Date: <br/>
+            <input type="date" name="chosen_date" min="2020-02-29" value="2020-04-21"/><br/>
+        </p>
+
+        <p>
+            Sort direction: <br/>
+                <input type='radio' name='dir'
+                    value='desc' checked='checked'/>High to Low<br/>
+                <input type='radio' name='dir'
+                    value='asc'/>Low to High<br/>
+        </p>
+        
+        <p>
+            How many regions do you want to show:
+            <input type="text" name='howmany' value='10' min='1' max='50'><br/>
+        </p>
+        <input type='submit' value='Get Bars'/><br/>
+    </form>
+
     <h3>
         Click state to view the details:
     </h3>
