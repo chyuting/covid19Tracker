@@ -1,14 +1,17 @@
 # covid19Tracker
+## Start
+Install all required libraries.
+```
+pip install -r requirements.txt
+```
 
-## Play with a command line tool.
-
-Test if you correctly installed webdrive
+Test if you correctly installed webdrive.
 ```
 python chrome_driver_test.py
 ```
 
-Type in a state's name(i.e. Michigan), get the most updated covid19 info from CDC website.
-Make sure dependent libraries are installed.
+## Play with a command line tool.
+Type in a state's name(i.e. Michigan) or a race name(i.e. Asian) or a age(i.e. 20), get the most updated covid19 info from CDC website.
 ```
 python crawlCDC.py
 ```
@@ -27,9 +30,9 @@ python app.py
 ```
 
 ![alt text](https://github.com/chyuting/covid19Tracker/blob/master/static/acc_new.png "Nationwide")
-![alt text](https://github.com/chyuting/covid19Tracker/blob/master/static/state.png "States distribution")
+![alt text](https://github.com/chyuting/covid19Tracker/blob/master/static/states.png "States distribution")
 ![alt text](https://github.com/chyuting/covid19Tracker/blob/master/static/age.png "Age distribution")
-![alt text](https://github.com/chyuting/covid19Tracker/blob/master/static/race.png "Race distribution")
+![alt text](https://github.com/chyuting/covid19Tracker/blob/master/static/race1.png "Race distribution")
 ![alt text](https://github.com/chyuting/covid19Tracker/blob/master/static/demo_all.png "Demo 1")
 ![alt text](https://github.com/chyuting/covid19Tracker/blob/master/static/demo_michigan.png "Demo 1")
 
