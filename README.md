@@ -29,7 +29,7 @@ python app.py
 ![alt text](https://github.com/chyuting/covid19Tracker/blob/master/static/acc_new.png "Nationwide")
 ![alt text](https://github.com/chyuting/covid19Tracker/blob/master/static/state.png "States distribution")
 ![alt text](https://github.com/chyuting/covid19Tracker/blob/master/static/age.png "Age distribution")
-![alt text](https://github.com/chyuting/covid19Tracker/blob/master/static/race.png "Race distribution")
+![alt text](https://github.com/chyuting/covid19Tracker/blob/master/static/race1.png "Race distribution")
 ![alt text](https://github.com/chyuting/covid19Tracker/blob/master/static/demo_all.png "Demo 1")
 ![alt text](https://github.com/chyuting/covid19Tracker/blob/master/static/demo_michigan.png "Demo 1")
 
