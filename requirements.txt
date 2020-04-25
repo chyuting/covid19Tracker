@@ -1,0 +1,7 @@
+requests
+bs4
+beautifulsoup4
+selenium
+Flask
+Flask-Caching
+plotly
