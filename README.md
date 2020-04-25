@@ -1,14 +1,17 @@
 # covid19Tracker
+## Start
+Install all required libraries.
+```
+pip install -r requirements.txt
+```
 
-## Play with a command line tool.
-
-Test if you correctly installed webdrive
+Test if you correctly installed webdrive.
 ```
 python chrome_driver_test.py
 ```
 
-Type in a state's name(i.e. Michigan), get the most updated covid19 info from CDC website.
-Make sure dependent libraries are installed.
+## Play with a command line tool.
+Type in a state's name(i.e. Michigan) or a race name(i.e. Asian) or a age(i.e. 20), get the most updated covid19 info from CDC website.
 ```
 python crawlCDC.py
 ```
