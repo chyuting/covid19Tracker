@@ -63,7 +63,13 @@ def plot_stacked_bar(cache):
             go.Bar(name='Accumulated cases', x=x_vals, y=y1_vals)
         ]
     )
-    stacked_fig.update_layout(barmode='stack',  xaxis={'categoryorder': 'category ascending'})
+    stacked_fig.update_layout(barmode='stack',  xaxis={'categoryorder': 'category ascending'},
+    title={
+        'text': "Covid19 in the U.S.",
+        'y':0.9,
+        'x':0.5,
+        'xanchor': 'center',
+        'yanchor': 'top'})
     stacked_fig.write_image('static/acc_new.png')
 
 def plot_pie_charts(cache):
@@ -79,7 +85,13 @@ def plot_pie_charts(cache):
         data=[go.Pie(labels=labels, values=values)]
     )
     pie_fig.update_traces(textposition='inside')
-    pie_fig.update_layout(uniformtext_minsize=10, uniformtext_mode='hide')
+    pie_fig.update_layout(uniformtext_minsize=10, uniformtext_mode='hide',
+        title={
+        'text': "Distribution by state",
+        'y':0.9,
+        'x':0.5,
+        'xanchor': 'center',
+        'yanchor': 'top'})
     pie_fig.write_image('static/state_pie.png')
 
     # distribution by age
@@ -89,7 +101,13 @@ def plot_pie_charts(cache):
     pie_fig = go.Figure(
         data=[go.Pie(labels=labels, values=values)]
     )
-    pie_fig.update_layout(uniformtext_minsize=10, uniformtext_mode='hide')
+    pie_fig.update_layout(uniformtext_minsize=10, uniformtext_mode='hide', 
+        title={
+        'text': "Distribution by age",
+        'y':0.9,
+        'x':0.5,
+        'xanchor': 'center',
+        'yanchor': 'top'})
     pie_fig.write_image('static/age.png')
 
     # distribution by race
@@ -99,10 +117,17 @@ def plot_pie_charts(cache):
     pie_fig = go.Figure(
         data=[go.Pie(labels=labels, values=values)]
     )
-    pie_fig.update_layout(uniformtext_minsize=10, uniformtext_mode='hide')
+    pie_fig.update_layout(uniformtext_minsize=10, uniformtext_mode='hide', 
+        title={
+        'text': "Distribution by race",
+        'y':0.9,
+        'x':0.5,
+        'xanchor': 'center',
+        'yanchor': 'top'})
     pie_fig.write_image('static/race.png')
 
 def plot(state_nm, data):
+    '''plot total cases and deaths of a state'''
     x_vals = [i[2] for i in data] # date
     y1_vals = [i[3] for i in data] # total cases
     y2_vals = [i[5] for i in data] # total deaths
@@ -113,7 +138,13 @@ def plot(state_nm, data):
         ]
     )
     print('generating pictures')
-    fig.update_layout(xaxis={'categoryorder': 'category ascending'})
+    fig.update_layout(xaxis={'categoryorder': 'category ascending'},
+        title={
+        'text': f"Trend in {state_nm}",
+        'y':0.9,
+        'x':0.5,
+        'xanchor': 'center',
+        'yanchor': 'top'})
     fig.write_image(f'static/{state_nm}1.png')
 
 def get_bars_by_rating(sortby, chosen_date, orderby, limit):
@@ -135,7 +166,6 @@ def percent_rate(results):
     '''0.01 -> 1%'''
     r = []
     idx = -1
-    print(len(results[0]))
     if len(results[0])>9:
         idx = 9
     for res in results:
