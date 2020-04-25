@@ -32,6 +32,7 @@ DB_NAME = JHU_API.DB_NAME # built database is required
 region_list = JHU_API.read_regions()
 
 def get_history_data_by_state(state_nm):
+    '''Read a state's detail data from database'''
     if state_nm in region_list:
         q = f'''
         SELECT * FROM Counts 
@@ -47,23 +48,51 @@ def get_history_data_by_state(state_nm):
         return results
 
 def _todate(str):
-    '''change str to a date obj'''
+    '''a date str -> a date obj'''
     y,m,d = str.split('-')
     return datetime.date(year=int(y), month=int(m), day=int(d))
+
+def _sqldate(str):
+    ''' 2020-4-24 -> 2020-04-24 '''
+    y,m,d = str.split('-')
+    if len(m)<2:
+        m = '0'+m
+    return '-'.join([y,m,d])
 
 def plot_stacked_bar(cache):
     ''' Plot stacked bar figure'''
     tend = cache['date']
-    x_vals = [_todate(key) for key in tend.keys()] # dates
+    x_vals = [_todate(key) for key in tend.keys()] # label (date obj)
     y1_vals = [tend[key][0]-tend[key][1] for key in tend.keys()]
     y2_vals = [tend[key][1] for key in tend.keys()]
+    y3_vals = []
+
+    dates = [_sqldate(key) for key in tend.keys()] # dates to search in db
+    conn = sqlite3.connect(DB_NAME)
+    cur = conn.cursor()
+    q = '''
+        SELECT Recovered FROM Counts
+        WHERE RegionId = 137
+        AND Date = ?
+    '''
+    for d in dates:
+        result = cur.execute(q, [d]).fetchone()
+        print(result)
+        if result:
+            y3_vals.append(-int(result[0])) # negative value
+        else:
+            y3_vals.append(0)
+    conn.close()
+
     stacked_fig = go.Figure(
         data=[
             go.Bar(name='New cases', x=x_vals, y=y2_vals),
-            go.Bar(name='Accumulated cases', x=x_vals, y=y1_vals)
+            go.Bar(name='Accumulated cases', x=x_vals, y=y1_vals),
+            go.Bar(name='Accumulated recovered', x=x_vals, y=y3_vals)
         ]
     )
-    stacked_fig.update_layout(barmode='stack',  xaxis={'categoryorder': 'category ascending'},
+    stacked_fig.update_layout(barmode='relative',  xaxis={'categoryorder': 'category ascending'},
+    legend=dict(x=-.1, y=1.2),
     title={
         'text': "Covid19 in the U.S.",
         'y':0.9,
@@ -85,14 +114,16 @@ def plot_pie_charts(cache):
         data=[go.Pie(labels=labels, values=values)]
     )
     pie_fig.update_traces(textposition='inside')
-    pie_fig.update_layout(uniformtext_minsize=10, uniformtext_mode='hide',
+    pie_fig.update_layout(legend_title='<b> States </b>',
+        legend=dict(x=-.1, y=1.2),
+        uniformtext_minsize=10, uniformtext_mode='hide',
         title={
         'text': "Distribution by state",
         'y':0.9,
         'x':0.5,
         'xanchor': 'center',
         'yanchor': 'top'})
-    pie_fig.write_image('static/state_pie.png')
+    pie_fig.write_image('static/states.png')
 
     # distribution by age
     age = cache['age']
@@ -101,7 +132,10 @@ def plot_pie_charts(cache):
     pie_fig = go.Figure(
         data=[go.Pie(labels=labels, values=values)]
     )
-    pie_fig.update_layout(uniformtext_minsize=10, uniformtext_mode='hide', 
+    pie_fig.update_traces(textposition='inside')
+    pie_fig.update_layout(legend_title='<b> Age </b>',
+        legend=dict(x=-.1, y=1.2),
+        uniformtext_minsize=10, uniformtext_mode='hide', 
         title={
         'text': "Distribution by age",
         'y':0.9,
@@ -112,12 +146,15 @@ def plot_pie_charts(cache):
 
     # distribution by race
     race = cache['race']
-    labels = list(race.keys())
+    labels = [k.split('or')[0] for k in race.keys()]
     values = list(race.values())
     pie_fig = go.Figure(
         data=[go.Pie(labels=labels, values=values)]
     )
-    pie_fig.update_layout(uniformtext_minsize=10, uniformtext_mode='hide', 
+    pie_fig.update_traces(textposition='inside')
+    pie_fig.update_layout(legend_title='<b> Race </b>',
+        legend=dict(x=-.1, y=1.2),
+        uniformtext_minsize=10, uniformtext_mode='hide', 
         title={
         'text': "Distribution by race",
         'y':0.9,
@@ -148,6 +185,7 @@ def plot(state_nm, data):
     fig.write_image(f'static/{state_nm}1.png')
 
 def get_bars_by_rating(sortby, chosen_date, orderby, limit):
+    '''Read data with filters from database'''
     conn = sqlite3.connect(DB_NAME)
     cur = conn.cursor()
     q = f'''
