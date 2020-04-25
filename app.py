@@ -1,3 +1,9 @@
+######################
+# Flask app
+# Author: Yuting Chen
+# Uniquename: chyuting
+######################
+
 from flask import Flask, render_template, request
 from flask_caching import Cache
 import plotly
@@ -125,6 +131,18 @@ def get_bars_by_rating(sortby, chosen_date, orderby, limit):
     conn.close()
     return results
 
+def percent_rate(results):
+    '''0.01 -> 1%'''
+    r = []
+    idx = -1
+    print(len(results[0]))
+    if len(results[0])>9:
+        idx = 9
+    for res in results:
+        l = list(res)
+        l[idx] = "{:.2%}".format(l[idx])
+        r.append(tuple(l))
+    return r
 
 @app.route('/')
 def index():
@@ -133,7 +151,7 @@ def index():
     d = today.day
     y = today.year
     state_dict = cache['state']
-    return render_template('index.html', month=m, year=y, day=d, 
+    return render_template('index.html', month=m, year=y, day=d,
     cases=total_cases, deaths=total_deaths, states = state_dict)
 
 @app.route('/results', methods=['POST'])
@@ -143,6 +161,8 @@ def results():
     orderby = request.form['dir']
     limit = request.form['howmany']
     results = get_bars_by_rating(sortby=sortby, chosen_date=chosen_date, orderby=orderby, limit=limit)
+    if sortby == "FatalityRate":
+        results = percent_rate(results)
     return render_template('results.html', results = results)
 
 @app.route('/state/<state_nm>')
@@ -150,6 +170,7 @@ def state(state_nm):
     data = get_history_data_by_state(state_nm)
     if data:
         plot(state_nm, data)
+        data = percent_rate(data)
         return render_template('state.html', nm= state_nm, data= data)
     else:
         html = f'''<p> Sorry, No data found for state {state_nm}. Please try again. </p>'''
