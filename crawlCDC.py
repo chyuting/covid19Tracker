@@ -19,7 +19,6 @@ import logging
 LOGGER.setLevel(logging.WARNING)
 
 
-#data_source = 'https://coronavirus.1point3acres.com/en'
 driver_path = 'C:/Users/pc/Downloads/chromedriver_win32/chromedriver.exe' # Please change the driver path to where chrome driver is
 CDCurl = 'https://www.cdc.gov/coronavirus/2019-ncov/cases-in-us.html'
 today = datetime.date.today() # cache everyday
@@ -230,7 +229,7 @@ def update():
     return cache
 
 def multi_capitalize(response):
-    ''' Processing user input
+    ''' Capitalize user input
     Parameters
     ----------
     response: str
@@ -246,24 +245,69 @@ def multi_capitalize(response):
         captalized.append(i.capitalize()) # michigan -> Michigan
     return ' '.join(captalized)
 
+def process_age(response):
+    '''Find total cases and percentile for an age group.
+    Parameters
+    ----------
+    response: str
+    
+    Returns
+    -------
+    none
+    '''
+    response = int(response)
+    if response >= 0 and response<=140:
+        num = 0
+        group = ''
+        # percentile = 0
+        if response < 18:
+            num = age_dict['< 18']
+            group = '< 18'
+        elif response <= 44:
+            num = age_dict['18-44']
+            group = '18-44'
+        elif response <= 64:
+            num = age_dict['45-64']
+            group = '45-64'
+        elif response <=74:
+            num = age_dict['65-74']
+            group = '65-74'
+        else:
+            num = age_dict['75+']
+            group = '75+'
+        percentile = int(num)/(int(age_dict['Total']) - int(age_dict['Unknown']))
+        print(f'The accumulated cases of age group {group} are {num} ({"{:.1%}".format(percentile)} of total cases).\n')
+    else:
+        print('Please type in an age between 0 and 140.')
+
 
 if __name__ == "__main__":
-    clear_cache(clear_today=True) # False -> update everday, True -> delete all cache files
+    clear_cache(clear_today=False) # False -> update everday, True -> delete all cache files
     cache = update()
     state_dict = cache['state']
     date_list = cache['date']
     total_cases, total_death = cache['today']
+    age_dict, race_dict = cache['age'], cache['race']
+
     print(f'''Welcome! Today's date is {today.strftime('%B')} {today.day}, {today.year}''')
     print(f'''Unitil today, total cases number is {total_cases}, total death number is {total_death}.''')
     
     while True:
-        response = input("Please type in a state's name, i.e. Michigan: ")
+        response = input("Please type in a state's name(i.e. Michigan) or race(i.e. Asia/Black/White/American Indian/Pacific/Multiple) or age(i.e. 20): ")
         if response.lower() == 'exit':
             break
 
-        response = multi_capitalize(response)
-        if response in state_dict:
-            print(f'The accumulated COVID19 cases of {response} is {state_dict[response]}.\n')
-        
+        if response.isdigit():
+            process_age(response)
+
         else:
-            print("Please type in a valid state's name")
+            response = multi_capitalize(response)
+            if len(response)>0 and response in state_dict.keys():
+                print(f'The accumulated COVID19 cases of state {response} is {state_dict[response]}.\n')
+            
+            elif len(response)>0 and any(response in race for race in race_dict.keys()):
+                for race in race_dict.keys():
+                    if response in race:
+                        print(f'The accumulated COVID19 cases of race {race} is {race_dict[race]}.\n')
+            else:
+                print("Please type in a valid input.")
