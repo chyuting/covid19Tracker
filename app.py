@@ -77,7 +77,6 @@ def plot_stacked_bar(cache):
     '''
     for d in dates:
         result = cur.execute(q, [d]).fetchone()
-        print(result)
         if result:
             y3_vals.append(-int(result[0])) # negative value
         else:
