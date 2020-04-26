@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <title>COVID19 in the US</title>
+  <link rel="shortcut icon" href="">
   <style>
         table, th, td {
             border: 1px solid black;
@@ -15,7 +16,30 @@
         }
         tr:nth-child(even){background-color: #f2f2f2;}
         tr:hover{background-color: #ddd;}
+        .button {text-align:center;
+            background-color: #555555;
+            color: white;
+            padding: 15px 32px;
+            margin: 4px 2px;
+            font-size: 16px;
+        }
+        .button1 {
+            background-color: #FFCB05;
+        }
+        .button2 {
+            background-color: #00274C;
+        }
+        .button3 {
+            background-color: pink;
+        }
   </style>
+  <script>
+        function myFunc(img_src) {
+          var x = document.getElementById('distribution');
+          x.src = img_src;
+          x.style.display= 'block'
+        }
+  </script>
 </head>
 <body>
     <h1>
@@ -25,10 +49,12 @@
     <h2>
         Total Cases: {{cases}}, total deaths: {{deaths}}.
     </h2>
-    <img src='../static/acc_new.png' alt='accumulated and new cases by date'>
-    <img src='../static/states.png' alt='national distribution'>
-    <img src='../static/age.png' alt='distribution by age'>
-    <img src='../static/race.png' alt='distribution by race'>
+    <img src='../static/acc_new.png' alt='accumulated and new cases by date'/>
+    <br>
+    <button class ="button button1" onclick="myFunc('../static/states.png')">Distribution by states</button>
+    <button class ="button button2" onclick="myFunc('../static/age.png')">Distribution by age</button>
+    <button class ="button button3" onclick="myFunc('../static/race.png')">Distribution by race</button>
+    <img id='distribution'>
 
     <h3> Please choose from the four options: </h3>
     <form action='results' method='POST'>
