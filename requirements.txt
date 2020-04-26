@@ -5,3 +5,4 @@ selenium
 Flask
 Flask-Caching
 plotly
+gunicorn
