@@ -7,3 +7,4 @@ Flask-Caching
 plotly
 gunicorn
 psutil
+gevent
