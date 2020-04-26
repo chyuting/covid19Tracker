@@ -17,7 +17,7 @@ import crawlCDC
 import JHU_API
 
 config = {
-    "DEBUG": True,          # some Flask specific configs
+    "DEBUG": False,          # when deploy
     "CACHE_TYPE": "null", # Flask-Caching related configs
 }
 app = Flask(__name__)
