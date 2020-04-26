@@ -244,9 +244,9 @@ def state(state_nm):
         return html
 
 if __name__ == '__main__':
-    if not os.path.exists('static/acc_new.png'):
+    if not os.path.exists('static/acc_new.png'): # deploy
         plot_stacked_bar(cache)
-    if not os.path.exists('static/state.png'):
+    if not os.path.exists('static/states.png'):
         plot_pie_charts(cache)
     print('starting Flask app', app.name)
     app.run()
