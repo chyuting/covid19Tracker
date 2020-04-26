@@ -5,7 +5,7 @@
 ######################
 
 from flask import Flask, render_template, request
-from flask_caching import Cache
+from gevent.pywsgi import WSGIServer
 import plotly
 import plotly.graph_objs as go
 import os
@@ -16,12 +16,7 @@ import sqlite3
 import crawlCDC
 import JHU_API
 
-config = {
-    "DEBUG": False,          # when deploy
-    "CACHE_TYPE": "null", # Flask-Caching related configs
-}
 app = Flask(__name__)
-app.config.from_mapping(config)
 today = crawlCDC.today
 cache = crawlCDC.open_cache()
 if cache == {}:
@@ -249,4 +244,9 @@ if __name__ == '__main__':
     if not os.path.exists('static/states.png'):
         plot_pie_charts(cache)
     print('starting Flask app', app.name)
-    app.run()
+    # Debug/Develpment
+    # app.run(debug=True)
+
+    # Production
+    http_server = WSGIServer(('', 5000),app)
+    http_server.serve_forever()
