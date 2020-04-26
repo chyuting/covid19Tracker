@@ -12,7 +12,6 @@ import datetime
 import os
 import crawlCDC
 
-key = secrets.jhuapi_key
 today = datetime.date.today()
 DB_NAME = 'UScovid19.sqlite'
 
@@ -197,6 +196,7 @@ def read_recentDate():
     return datetime.date(year=int(year), month=int(month), day=int(day))+datetime.timedelta(1)
 
 if __name__ == "__main__":
+    key = secrets.jhuapi_key
     if not os.path.isfile(DB_NAME): # if database doesn't exist
         print('Creating a new database.')
         region_info = get_regions(iso="USA") # get regions
