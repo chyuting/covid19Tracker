@@ -1,6 +1,6 @@
 __pycache__
-*.json 
 *.pdf
 .html
+.vscode
 secrets.py
 document/
