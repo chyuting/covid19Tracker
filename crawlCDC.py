@@ -48,7 +48,7 @@ def clear_cache(clear_today = False):
             print('Clear cache file: %s'%cache_file)
             os.remove(cache_file)
 
-def open_cache():
+def open_cache(file_path=CACHE_FILE_PATH):
     ''' Opens the cache file if it exists and loads the JSON into
     the CACHE_DICT dictionary.
     if the cache file doesn't exist, creates a new cache dictionary
@@ -63,7 +63,7 @@ def open_cache():
 
     '''
     try:
-        cache_file = open(CACHE_FILE_PATH, 'r')
+        cache_file = open(file_path, 'r')
         cache_contents = cache_file.read()
         cache_dict = json.loads(cache_contents)
         cache_file.close()
@@ -109,7 +109,7 @@ def cases_by_state(info):
         content = row.find_all('div', class_ = 'rt-td')
         if len(content) >= 2:
             state = content[0].find_all('span')[-1]
-            accumulated = content[1].find('span')
+            accumulated = content[2].find('span')
             if accumulated.text != '0':
                 d[state.text] = accumulated.text.replace(',', '') # '1,000' ->'1000'
     return d

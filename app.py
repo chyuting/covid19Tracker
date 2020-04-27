@@ -8,7 +8,7 @@ from flask import Flask, render_template, request
 from gevent.pywsgi import WSGIServer
 import plotly
 import plotly.graph_objs as go
-import os
+import os,glob
 import random
 import requests
 import datetime
@@ -19,9 +19,12 @@ import JHU_API
 app = Flask(__name__)
 today = crawlCDC.today
 cache = crawlCDC.open_cache()
-if cache == {}:
-    crawlCDC.update()
-    cache = crawlCDC.open_cache()
+if cache == {}: # cache file is not updated
+    for file_path in glob.glob('*.json'):
+        cache = crawlCDC.open_cache(file_path)
+        break
+    #crawlCDC.update()
+    #cache = crawlCDC.open_cache()
 
 DB_NAME = JHU_API.DB_NAME # built database is required
 region_list = JHU_API.read_regions()
@@ -223,7 +226,7 @@ def index():
     y = today.year
     state_dict = cache['state']
     return render_template('index.html', month=m, year=y, day=d,
-    cases=total_cases, deaths=total_deaths, states = state_dict)
+    cases=total_cases, deaths=total_deaths, states=state_dict)
 
 @app.route('/results', methods=['POST'])
 def results():
