@@ -206,6 +206,15 @@ def percent_rate(results):
         r.append(tuple(l))
     return r
 
+def update_static_images():
+    '''update static images before deployment'''
+    plot_stacked_bar(cache)
+    plot_pie_charts(cache)
+    for state_nm in cache['state']:
+        data = get_history_data_by_state(state_nm)
+        if data:
+            plot(state_nm, data)
+
 @app.route('/')
 def index():
     total_cases, total_deaths = cache['today']
@@ -231,7 +240,6 @@ def results():
 def state(state_nm):
     data = get_history_data_by_state(state_nm)
     if data:
-        plot(state_nm, data)
         data = percent_rate(data)
         return render_template('state.html', nm= state_nm, data= data)
     else:
@@ -239,14 +247,11 @@ def state(state_nm):
         return html
 
 if __name__ == '__main__':
-    if not os.path.exists('static/acc_new.png'): # deploy
-        plot_stacked_bar(cache)
-    if not os.path.exists('static/states.png'):
-        plot_pie_charts(cache)
     print('starting Flask app', app.name)
-    # Debug/Develpment
+    # Debug/Develpment mode
+    # update_static_images()
     # app.run(debug=True)
 
-    # Production
+    # # Production mode
     http_server = WSGIServer(('', 5000),app)
     http_server.serve_forever()
