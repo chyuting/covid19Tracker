@@ -34,9 +34,9 @@ Comment Developer/Debug mode, uncomment Production mode in `app.py`. Create a re
 ```
 heroku create
 ```
-Set heroku timezone to America.
+Set heroku timezone to America New York time.
 ```
- heroku config:add TZ="America/Argentina/Buenos_Aires"
+heroku config:add TZ="America/New_York"
 ```
 Push app to github and heroku.
 ```
