@@ -23,18 +23,31 @@ python JHU_API.py
 ```
 
 ## Visualization
-Run Flask app. Click on state for details. Plotly-oraca library is required.
+Run Flask app localhost. Plotly-oraca library is required to update static images.
 
 ```
 python app.py
 ```
 
-![alt text](https://github.com/chyuting/covid19Tracker/blob/master/static/acc_new.png "Nationwide")
-![alt text](https://github.com/chyuting/covid19Tracker/blob/master/static/states.png "States distribution")
-![alt text](https://github.com/chyuting/covid19Tracker/blob/master/static/age.png "Age distribution")
-![alt text](https://github.com/chyuting/covid19Tracker/blob/master/static/race1.png "Race distribution")
-![alt text](https://github.com/chyuting/covid19Tracker/blob/master/static/demo_all.png "Demo 1")
-![alt text](https://github.com/chyuting/covid19Tracker/blob/master/static/demo_michigan.png "Demo 1")
-
-
-
+## Deployment
+Create a remote heroku project with random name.
+```
+heroku create
+```
+Set heroku timezone to America.
+```
+ heroku config:add TZ="America/Argentina/Buenos_Aires"
+```
+Push app to github and heroku.
+```
+git push heroku master
+```
+Open heroku web.
+```
+heroku ps:scale web=1
+heroku open
+```
+Take a look at heroku log file to debug.
+```
+heroku logs --tail
+```
