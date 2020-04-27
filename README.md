@@ -1,5 +1,5 @@
 # covid19Tracker
-## Start
+## Setup
 Install all required libraries.
 ```
 pip install -r requirements.txt
@@ -22,15 +22,15 @@ python crawlCDC.py
 python JHU_API.py
 ```
 
-## Visualization
-Run Flask app localhost. Plotly-oraca library is required to update static images.
+## Flask app
+Uncomment Developer/Debug mode in `app.py`. Run a Flask app locally. Plotly-oraca library is required to update static images.
 
 ```
 python app.py
 ```
 
 ## Deployment
-Create a remote heroku project with random name.
+Comment Developer/Debug mode, uncomment Production mode in `app.py`. Create a remote heroku project with random name.
 ```
 heroku create
 ```
