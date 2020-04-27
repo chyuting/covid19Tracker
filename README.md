@@ -10,7 +10,7 @@ Test if you correctly installed webdrive.
 python chrome_driver_test.py
 ```
 
-Register an account in [RapidAPI](https://rapidapi.com/). Copy X-RapidAPI-Key in [instruction page](https://rapidapi.com/KishCom/api/covid-19-coronavirus-statistics/).
+Register an account in [RapidAPI](https://rapidapi.com/). Copy X-RapidAPI-Key in [instruction page](https://rapidapi.com/KishCom/api/covid-19-coronavirus-statistics/) as your secrets.jhuapi_key.
 
 ## Play with a command line tool.
 Type in a state's name(i.e. Michigan) or a race name(i.e. Asian) or a age(i.e. 20), get the most updated covid19 info from CDC website.
