@@ -45,17 +45,38 @@ def get_history_data_by_state(state_nm):
         conn.close()
         return results
 
+def get_bars_by_rating(sortby, chosen_date, orderby, limit):
+    '''Read data with filters from database'''
+    conn = sqlite3.connect(DB_NAME)
+    cur = conn.cursor()
+    q = f'''
+        SELECT RegionName, {sortby} FROM Counts
+        JOIN Regions
+        ON Regions.Id = Counts.RegionId
+        WHERE Date = '{chosen_date}'
+        ORDER BY {sortby} {orderby}
+        LIMIT {limit}
+        '''
+    results = cur.execute(q).fetchall()
+    conn.close()
+    return results
+
+def _percent_rate(results):
+    '''0.01 -> 1%'''
+    r = []
+    idx = -1
+    if len(results[0])>9:
+        idx = 9
+    for res in results:
+        l = list(res)
+        l[idx] = "{:.2%}".format(l[idx])
+        r.append(tuple(l))
+    return r
+
 def _todate(str):
     '''a date str -> a date obj'''
     y,m,d = str.split('-')
     return datetime.date(year=int(y), month=int(m), day=int(d))
-
-def _sqldate(str):
-    ''' 2020-4-24 -> 2020-04-24 '''
-    y,m,d = str.split('-')
-    if len(m)<2:
-        m = '0'+m
-    return '-'.join([y,m,d])
 
 def plot_stacked_bar(cache):
     ''' Plot stacked bar figure'''
@@ -161,7 +182,7 @@ def plot_pie_charts(cache):
         'yanchor': 'top'})
     pie_fig.write_image('static/race.png')
 
-def plot(state_nm, data):
+def plot_state(state_nm, data):
     '''plot total cases and deaths of a state'''
     x_vals = [i[2] for i in data] # date
     y1_vals = [i[3] for i in data] # total cases
@@ -182,34 +203,6 @@ def plot(state_nm, data):
         'yanchor': 'top'})
     fig.write_image(f'static/{state_nm}1.png')
 
-def get_bars_by_rating(sortby, chosen_date, orderby, limit):
-    '''Read data with filters from database'''
-    conn = sqlite3.connect(DB_NAME)
-    cur = conn.cursor()
-    q = f'''
-        SELECT RegionName, {sortby} FROM Counts
-        JOIN Regions
-        ON Regions.Id = Counts.RegionId
-        WHERE Date = '{chosen_date}'
-        ORDER BY {sortby} {orderby}
-        LIMIT {limit}
-        '''
-    results = cur.execute(q).fetchall()
-    conn.close()
-    return results
-
-def percent_rate(results):
-    '''0.01 -> 1%'''
-    r = []
-    idx = -1
-    if len(results[0])>9:
-        idx = 9
-    for res in results:
-        l = list(res)
-        l[idx] = "{:.2%}".format(l[idx])
-        r.append(tuple(l))
-    return r
-
 def update_static_images():
     '''update static images before deployment'''
     plot_stacked_bar(cache)
@@ -217,7 +210,7 @@ def update_static_images():
     for state_nm in cache['state']:
         data = get_history_data_by_state(state_nm)
         if data:
-            plot(state_nm, data)
+            plot_state(state_nm, data)
 
 @app.route('/')
 def index():
@@ -240,14 +233,14 @@ def results():
     limit = request.form['howmany']
     results = get_bars_by_rating(sortby=sortby, chosen_date=chosen_date, orderby=orderby, limit=limit)
     if sortby == "FatalityRate":
-        results = percent_rate(results)
+        results = _percent_rate(results)
     return render_template('results.html', results = results)
 
 @app.route('/state/<state_nm>')
 def state(state_nm):
     data = get_history_data_by_state(state_nm)
     if data:
-        data = percent_rate(data)
+        data = _percent_rate(data)
         return render_template('state.html', nm= state_nm, data= data)
     else:
         html = f'''<p> Sorry, No data found for state {state_nm}. Please try again. </p>'''
