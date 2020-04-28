@@ -44,7 +44,7 @@
 <body>
     <h1>
         Cases of Coronavirus Disease (COVID-19) in the U.S. <br>
-        Today is {{month}} {{day}}, {{year}}.
+        Today is {{month}} {{day}}, {{year}}({{weekday}}).
     </h1>
     <h2>
         Total Cases: {{cases}}, total deaths: {{deaths}}.
@@ -74,7 +74,7 @@
 
         <p>
             Date: <br/>
-            <input type="date" name="chosen_date" min="2020-02-29" value="2020-04-26"/><br/>
+            <input type="date" name="chosen_date" min="2020-02-29" value='{{last_updated_date}}'/><br/>
         </p>
 
         <p>

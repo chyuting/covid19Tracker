@@ -65,7 +65,8 @@ def plot_stacked_bar(cache):
     y2_vals = [tend[key][1] for key in tend.keys()]
     y3_vals = []
 
-    dates = [_sqldate(key) for key in tend.keys()] # dates to search in db
+    #dates = [_sqldate(key) for key in tend.keys()] # dates to search in db
+    dates = [d.isoformat() for d in x_vals]
     conn = sqlite3.connect(DB_NAME)
     cur = conn.cursor()
     q = '''
@@ -221,11 +222,14 @@ def update_static_images():
 @app.route('/')
 def index():
     total_cases, total_deaths = cache['today']
+    last_updated_date = today - datetime.timedelta(1)
     m = today.strftime('%B') # 4 -> April
     d = today.day
     y = today.year
+    weekday = today.strftime('%A') # Friday
     state_dict = cache['state']
-    return render_template('index.html', month=m, year=y, day=d,
+    return render_template('index.html', month=m, year=y, day=d, weekday=weekday, 
+    last_updated_date=last_updated_date.isoformat(),
     cases=total_cases, deaths=total_deaths, states=state_dict)
 
 @app.route('/results', methods=['POST'])
