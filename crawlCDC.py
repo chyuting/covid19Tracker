@@ -109,7 +109,7 @@ def cases_by_state(info):
         content = row.find_all('div', class_ = 'rt-td')
         if len(content) >= 2:
             state = content[0].find_all('span')[-1]
-            accumulated = content[2].find('span')
+            accumulated = content[1].find('span') # 1:total, 2:new
             if accumulated.text != '0':
                 d[state.text] = accumulated.text.replace(',', '') # '1,000' ->'1000'
     return d
@@ -130,13 +130,21 @@ def cases_by_date(info):
     table = info.find('tbody', class_='data-columns')
     results = table.find_all('td')
     numbers = {}
-    d = datetime.date(year=2020, month=1, day=22) # start date
+    # d = datetime.date(year=2020, month=1, day=22) # start date
+    # prev = 0
+    # for res in results:
+    #     acc = res.text
+    #     numbers[f'{d.year}-{d.month}-{d.day}']=(int(acc), int(acc)-int(prev))
+    #     d += datetime.timedelta(1) # move to the next day
+    #     prev = acc
+
+    d = datetime.date(year=2020, month=2, day=25) # new start date
     prev = 0
     for res in results:
-        acc = res.text
-        numbers[f'{d.year}-{d.month}-{d.day}']=(int(acc), int(acc)-int(prev))
+        new = int(res.text.replace(',', ''))
+        numbers[f'{d.year}-{d.month}-{d.day}']=(new+prev, new) # total, new
         d += datetime.timedelta(1) # move to the next day
-        prev = acc
+        prev += new
     return numbers
 
 def summary_today(info):
@@ -152,8 +160,10 @@ def summary_today(info):
         (total cases, total deaths)
 
     '''
-    total_cases = info.find('h2', id='covid-19-cases-total').text.replace(',', '').strip('\ufeff').strip()
-    total_deaths = info.find('h2', id='covid-19-deaths-total').text.replace(',', '').strip('\ufeff').strip()
+    call_out = info.find('div', class_='callouts-container')
+    counts = call_out.find_all('span',  class_='count')
+    total_cases = counts[0].text.replace(',', '').strip('\ufeff').strip()
+    total_deaths = counts[1].text.replace(',', '').strip('\ufeff').strip()
     return (total_cases, total_deaths)
 
 def cases_by_age_race(info):
@@ -217,7 +227,7 @@ def update():
         cache['state'] = cases_by_state(soup)
         
         driver.switch_to.default_content() # switch to html tag
-        wait.until(EC.frame_to_be_available_and_switch_to_it("cdcCharts2")) # switch to the next iframe
+        wait.until(EC.frame_to_be_available_and_switch_to_it("cdcCharts3")) # switch to the next iframe
         soup = BeautifulSoup(driver.page_source, 'html.parser')
         cache['date'] = cases_by_date(soup)
         
@@ -282,7 +292,7 @@ def process_age(response):
 
 
 if __name__ == "__main__":
-    clear_cache(clear_today=False) # False -> update everday, True -> delete all cache files
+    clear_cache(clear_today=True) # False -> update everday, True -> delete all cache files
     cache = update()
     state_dict = cache['state']
     date_list = cache['date']
