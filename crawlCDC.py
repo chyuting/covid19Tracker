@@ -209,6 +209,7 @@ def update():
     cache = open_cache()
     if cache == {}: # If cache is empty
         print('Fetching')
+        cache['lastupdatedtime'] = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S') # save the last updated time
         options = webdriver.ChromeOptions() # magic happens in silient
         options.add_argument("headless") # comment to watch how web driver works (deverloper view)
         options.add_argument("--log-level=3") # supress log output

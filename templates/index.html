@@ -1,77 +1,12 @@
-<!DOCTYPE html>
 <html>
 <head>
   <meta charset="UTF-8">
   <title>COVID19 in the US</title>
-  <link rel="shortcut icon" href="">
-  <style>
-        table, th, td {
-            border: 1px solid black;
-            border-collapse: collapse;
-            padding: 5px;
-        }
-        th{
-            background-color: lightskyblue;
-            color:white;
-        }
-        tr:nth-child(even){background-color: #f2f2f2;}
-        tr:hover{background-color: #ddd;}
-        .button {text-align:center;
-            background-color: #555555;
-            color: white;
-            padding: 15px 32px;
-            margin: 4px 2px;
-            font-size: 16px;
-        }
-        .button1 {
-            background-color: #FFCB05;
-        }
-        .button2 {
-            background-color: #00274C;
-        }
-        .button3 {
-            background-color: pink;
-        }
-        /* Style the tab */
-        .tab {
-        overflow: hidden;
-        border: 1px solid #ccc;
-        background-color: #f1f1f1;
-        }
-
-        /* Style the buttons inside the tab */
-        .tab button {
-        background-color: inherit;
-        float: left;
-        border: none;
-        outline: none;
-        cursor: pointer;
-        padding: 14px 16px;
-        transition: 0.3s;
-        font-size: 17px;
-        }
-
-        /* Change background color of buttons on hover */
-        .tab button:hover {
-        background-color: #ddd;
-        }
-
-        /* Create an active/current tablink class */
-        .tab button.active {
-        background-color: #ccc;
-        }
-
-        /* Style the tab content */
-        .tabcontent {
-        display: none;
-        padding: 6px 12px;
-        border: 1px solid #ccc;
-        border-top: none;
-        }
-  </style>
+  <link rel="shortcut icon" type="image/png" href="favicon-32x32.png" type="image/png">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
   <script>
         function myFunc(img_src) {
-          var x = document.getElementById('distribution');
+          var x = document.getElementById('pie_chart');
           x.src = img_src;
           x.style.display= 'block'
         }
@@ -84,81 +19,86 @@
     </h1>
     
     <div class="tab">
-        <button class="tablinks" onclick="openTab(event, 'home')" id="defaultOpen">Home</button>
+        <button class="tablinks" onclick="openTab(event, 'summary')" id="defaultOpen">Summary</button>
+        <button class="tablinks" onclick="openTab(event, 'distribution')">Distribution</button>
+        <button class="tablinks" onclick="openTab(event, 'rank')">Rank</button>
+        <button class="tablinks" onclick="openTab(event, 'state')">State</button>
         <button class="tablinks" onclick="openTab(event, 'source')">Data Source</button>
-        <button class="tablinks" onclick="openTab(event, 'contact')">Contact me</button>
+        <button class="tablinks" onclick="openTab(event, 'contact')">Contact</button>
     </div>
 
-    <div id="home" class="tabcontent">
-    <h2>
-        Total Cases: {{cases}}, total deaths: {{deaths}}.
-    </h2>
-    <img src='../static/acc_new.png' alt='accumulated and new cases by date'/>
-    <br>
-    <button class ="button button1" onclick="myFunc('../static/states.png')">Distribution by states</button>
-    <button class ="button button2" onclick="myFunc('../static/age.png')">Distribution by age</button>
-    <button class ="button button3" onclick="myFunc('../static/race.png')">Distribution by race</button>
-    <img id='distribution'>
+    <div id="summary" class="tabcontent" style="text-align: center;">
+        <h2>Total Cases: {{cases}}, total deaths: {{deaths}}.</h2>
+        <img src='../static/acc_new.png' alt='accumulated and new cases by date'/>
+    </div>
 
-    <h3> Please choose from the four options: </h3>
-    <form action='results' method='POST'>
-        <p>
-            Sort by: <br/>
-            <input type='radio' name='sort'
-                value='Confirmed' checked='checked'/> Total comfirmed <br/>
-            <input type='radio' name='sort'
-                value='NewConfirmed' /> New comfirmed<br/>
-            <input type='radio' name='sort'
-                value='Deaths' /> Total deaths <br/>
-            <input type='radio' name='sort'
-                value='NewDeaths' /> New deaths <br/>
-            <input type='radio' name='sort'
-                value='FatalityRate' /> Fatality rate <br/>
-        </p>
+    <div id="distribution" class="tabcontent" style="text-align: center;">
+        <h2> Please choose one distribution way: </h2>
+        <button class ="button button1" onclick="myFunc('../static/states.png')" id="defaultOpen">Distribution by states</button>
+        <button class ="button button2" onclick="myFunc('../static/age.png')">Distribution by age</button>
+        <button class ="button button3" onclick="myFunc('../static/race.png')">Distribution by race</button>
+        <img id='pie_chart' style='margin:auto;'>
+    </div>
 
-        <p>
-            Date: <br/>
-            <input type="date" name="chosen_date" min="2020-02-29" value='{{last_updated_date}}'/><br/>
-        </p>
+    <div id="rank" class="tabcontent" style="padding-left:30%;">
+        <h2>Please choose from the four options: </h2>
+        <form action='results' method='POST'>
+            <p>
+                Sort by: <br/>
+                <input type='radio' name='sort'
+                    value='Confirmed' checked='checked'/> Total comfirmed <br/>
+                <input type='radio' name='sort'
+                    value='NewConfirmed' /> New comfirmed<br/>
+                <input type='radio' name='sort'
+                    value='Deaths' /> Total deaths <br/>
+                <input type='radio' name='sort'
+                    value='NewDeaths' /> New deaths <br/>
+                <input type='radio' name='sort'
+                    value='FatalityRate' /> Fatality rate <br/>
+            </p>
 
-        <p>
-            Sort direction: <br/>
-                <input type='radio' name='dir'
-                    value='desc' checked='checked'/>High to Low<br/>
-                <input type='radio' name='dir'
-                    value='asc'/>Low to High<br/>
-        </p>
-        
-        <p>
-            How many regions do you want to show:
-            <input type="text" name='howmany' value='10' min='1' max='50'><br/>
-        </p>
-        <input type='submit' value='Get Results'/><br/>
-    </form>
-                                                                                      
-    <h3>
-        Click state to view the details:
-    </h3>
+            <p>
+                Date: <br/>
+                <input type="date" name="chosen_date" min="2020-02-29" value='{{last_updated_date}}'/><br/>
+            </p>
 
-    <table>
-        <tr>
-            <th>State</th>
-            <th>Cases</th>
-        </tr>
+            <p>
+                Sort direction: <br/>
+                    <input type='radio' name='dir'
+                        value='desc' checked='checked'/>High to Low<br/>
+                    <input type='radio' name='dir'
+                        value='asc'/>Low to High<br/>
+            </p>
+            
+            <p>
+                How many regions do you want to show:
+                <input type="text" name='howmany' value='10' min='1' max='50'><br/>
+            </p>
+            <input type='submit' value='Get Results' style='font-weight:bold;font-size: medium;'/><br/>
+        </form>
+    </div>
+    
+    <div id="state" class="tabcontent" style="padding-left: 40%;">
+        <h2>Click a state to view the details:</h2>
+        <table>
+            <tr>
+                <th>State</th>
+                <th>Cases</th>
+            </tr>
 
-    {% for state in states %}
-    {% if state %}
-        <tr>
-            <td><a href="/state/{{state}}">{{state}}</a></td>
-            <td>{{states[state]}}</td>
-        </tr>
-    {% endif%}       
-    {% endfor%}
-    </table>
+        {% for state in states %}
+        {% if state %}
+            <tr>
+                <td><a href="/state/{{state}}">{{state}}</a></td>
+                <td>{{states[state]}}</td>
+            </tr>
+        {% endif%}       
+        {% endfor%}
+        </table>
     </div>
 
     <div id='source' class='tabcontent'>
-        <p>Last updated date: {{last_updated_date}}</p>
+        <p>Last updated date: {{last_updated_time}} (Detroit time).</p>
         <p>Data comes from <a href='https://www.cdc.gov/coronavirus/2019-ncov/cases-updates/cases-in-us.html' target='_blank'>CDC website</a> 
             and <a href='https://rapidapi.com/KishCom/api/covid-19-coronavirus-statistics/details' target='_blank'>Johns Hopkins University API</a>.</p>
     </div>
