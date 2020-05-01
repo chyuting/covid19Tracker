@@ -165,7 +165,7 @@ def plot_pie_charts(cache):
     # distribution by race
     race = cache['race']
     labels = [k.split('or')[0] for k in race.keys()]
-    values = list(race.values())
+    values = [v.split('(')[0] for v in race.values()]
     pie_fig = go.Figure(
         data=[go.Pie(labels=labels, values=values)]
     )
